@@ -1,10 +1,11 @@
-const db = require('../config/db');
+const { getDb } = require('../config/db');
 
 const sendMessage = async (req, res) => {
     const { content } = req.body;
     const { id: sender_id, role: sender_role } = req.user;
 
     try {
+        const db = getDb();
         const result = await db.query(
             'INSERT INTO messages (sender_id, content, status) VALUES ($1, $2, $3) RETURNING *',
             [sender_id, content, 'pending']
@@ -21,6 +22,7 @@ const getUserMessages = async (req, res) => {
     const { id: userId } = req.user;
 
     try {
+        const db = getDb();
         const result = await db.query(
             'SELECT * FROM messages WHERE sender_id = $1 ORDER BY created_at DESC',
             [userId]
@@ -35,6 +37,7 @@ const getUserMessages = async (req, res) => {
 
 const getAllMessagesForAdmin = async (req, res) => {
     try {
+        const db = getDb();
         const result = await db.query(
             `SELECT m.*, u.name as sender_name 
        FROM messages m 
@@ -54,6 +57,7 @@ const updateMessage = async (req, res) => {
     const { content, status } = req.body;
 
     try {
+        const db = getDb();
         const result = await db.query(
             'UPDATE messages SET content = COALESCE($1, content), status = COALESCE($2, status) WHERE id = $3 RETURNING *',
             [content, status, id]

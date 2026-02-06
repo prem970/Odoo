@@ -1,13 +1,11 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-
-// Initialize environment variables
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
 const messageRoutes = require('./routes/messageRoutes');
-const db = require('./config/db');
+const { getDb } = require('./config/db');
 
 const app = express();
 
@@ -15,9 +13,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Health check - Database is ONLY accessed when this route is called
+// Health check - getDb() is called ONLY at runtime when a request hits this route
 app.get('/api/health', async (req, res) => {
     try {
+        const db = getDb();
         const result = await db.query('SELECT NOW()');
         res.json({
             status: 'ok',
@@ -30,11 +29,11 @@ app.get('/api/health', async (req, res) => {
     }
 });
 
-// API Routes
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messageRoutes);
 
-// Production Static Assets
+// Serve static assets from the React app in production
 if (process.env.NODE_ENV === 'production') {
     const buildPath = path.join(__dirname, '../client/dist');
     app.use(express.static(buildPath));
@@ -44,19 +43,13 @@ if (process.env.NODE_ENV === 'production') {
     });
 }
 
-// Global Error Handler
+// Basic error handler
 app.use((err, req, res, next) => {
-    console.error('App Error:', err.stack);
-    res.status(500).json({ message: 'Internal Server Error' });
+    console.error(err.stack);
+    res.status(500).json({ message: 'Something went wrong!' });
 });
 
-// Startup - Only start the listener if we are not being required as a module
-// and ensure port is accessed at runtime.
-const startServer = () => {
-    const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => {
-        console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-    });
-};
-
-startServer();
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+});

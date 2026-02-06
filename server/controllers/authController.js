@@ -1,4 +1,4 @@
-const db = require('../config/db');
+const { getDb } = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -6,6 +6,7 @@ const register = async (req, res) => {
     const { name, email, password, role } = req.body;
 
     try {
+        const db = getDb();
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -31,6 +32,7 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     try {
+        const db = getDb();
         const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
         const user = result.rows[0];
 
