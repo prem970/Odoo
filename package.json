@@ -3,7 +3,8 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-        "build": "cd client && npm install && npm run build && cd ../server && npm install",
+        "install:all": "npm install && cd client && npm install && cd ../server && npm install",
+        "build": "cd client && npm install && npm run build && cd ../server && npm install && node init-db.js",
         "postinstall": "cd client && npm install && cd ../server && npm install",
         "start": "node server/server.js"
     }
