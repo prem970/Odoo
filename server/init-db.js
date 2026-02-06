@@ -9,34 +9,45 @@ async function initDb() {
         await db.query(`
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
-                name VARCHAR(100) NOT NULL,
-                email VARCHAR(150) UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                role VARCHAR(20) DEFAULT 'user',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                name TEXT,
+                email TEXT UNIQUE,
+                password_hash TEXT,
+                role TEXT DEFAULT 'user',
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP::TEXT
             );
         `);
 
-        // Explicitly fix columns if they were created with wrong types/lengths previously
+        // Explicitly convert all columns to TEXT and fix defaults
         await db.query(`
-            ALTER TABLE users ALTER COLUMN role TYPE VARCHAR(20);
+            ALTER TABLE users ALTER COLUMN name TYPE TEXT;
+            ALTER TABLE users ALTER COLUMN email TYPE TEXT;
             ALTER TABLE users ALTER COLUMN password_hash TYPE TEXT;
-            ALTER TABLE users ALTER COLUMN email TYPE VARCHAR(150);
-            ALTER TABLE users ALTER COLUMN name TYPE VARCHAR(100);
+            ALTER TABLE users ALTER COLUMN role TYPE TEXT;
+            ALTER TABLE users ALTER COLUMN created_at TYPE TEXT;
+            ALTER TABLE users ALTER COLUMN created_at SET DEFAULT CURRENT_TIMESTAMP::TEXT;
+            ALTER TABLE users ALTER COLUMN created_at DROP NOT NULL;
         `);
-        console.log('✅ Users table schema verified/updated');
+        console.log('✅ Users table schema updated to TEXT');
 
-        // Create Messages Table
+        // Create or Update Messages Table
         await db.query(`
             CREATE TABLE IF NOT EXISTS messages (
                 id SERIAL PRIMARY KEY,
                 sender_id INTEGER REFERENCES users(id),
-                content TEXT NOT NULL,
-                status VARCHAR(20) DEFAULT 'pending',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                content TEXT,
+                status TEXT DEFAULT 'pending',
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP::TEXT
             );
         `);
-        console.log('✅ Messages table ready');
+
+        await db.query(`
+            ALTER TABLE messages ALTER COLUMN content TYPE TEXT;
+            ALTER TABLE messages ALTER COLUMN status TYPE TEXT;
+            ALTER TABLE messages ALTER COLUMN created_at TYPE TEXT;
+            ALTER TABLE messages ALTER COLUMN created_at SET DEFAULT CURRENT_TIMESTAMP::TEXT;
+            ALTER TABLE messages ALTER COLUMN created_at DROP NOT NULL;
+        `);
+        console.log('✅ Messages table schema updated to TEXT');
 
         console.log('--- Database Initialization Complete ---');
         process.exit(0);
