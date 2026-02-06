@@ -15,13 +15,14 @@ app.use(express.json());
 
 // Routes
 const db = require('./config/db');
+
 app.get('/api/health', async (req, res) => {
     try {
         const result = await db.query('SELECT NOW()');
-        res.json({ status: 'ok', time: result.rows[0] });
+        res.json({ status: 'ok', time: result.rows[0].now });
     } catch (err) {
         console.error('Health check failed:', err);
-        res.status(500).json({ status: 'error', message: err.message });
+        res.status(500).json({ status: 'error', message: 'Database connection failed' });
     }
 });
 
