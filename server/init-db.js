@@ -5,7 +5,7 @@ async function initDb() {
     try {
         console.log('--- Initializing Database ---');
 
-        // Create Users Table
+        // Create or Update Users Table
         await db.query(`
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
@@ -16,7 +16,15 @@ async function initDb() {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
-        console.log('✅ Users table ready');
+
+        // Explicitly fix columns if they were created with wrong types/lengths previously
+        await db.query(`
+            ALTER TABLE users ALTER COLUMN role TYPE VARCHAR(20);
+            ALTER TABLE users ALTER COLUMN password_hash TYPE TEXT;
+            ALTER TABLE users ALTER COLUMN email TYPE VARCHAR(150);
+            ALTER TABLE users ALTER COLUMN name TYPE VARCHAR(100);
+        `);
+        console.log('✅ Users table schema verified/updated');
 
         // Create Messages Table
         await db.query(`
