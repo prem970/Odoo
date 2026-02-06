@@ -8,15 +8,15 @@ let pool;
  */
 function getDb() {
   if (!pool) {
-    // Try all common Railway/Postgres variable names
+    // Priority: Public URL > Private URL > Individual PG vars
     let connectionString =
-      process.env.DATABASE_URL ||
       process.env.DATABASE_PUBLIC_URL ||
+      process.env.DATABASE_URL ||
       process.env.POSTGRES_URL;
 
     // If no URL exists, try to construct one from individual Railway variables
     if (!connectionString && process.env.PGHOST) {
-      connectionString = `postgresql://${process.env.PGUSER || process.env.POSTGRES_USER || 'postgres'}:${process.env.PGPASSWORD || process.env.POSTGRES_PASSWORD}@${process.env.PGHOST}:${process.env.PGPORT || 5432}/${process.env.PGDATABASE || process.env.POSTGRES_DB}`;
+      connectionString = `postgresql://${process.env.PGUSER || 'postgres'}:${process.env.PGPASSWORD}@${process.env.PGHOST}:${process.env.PGPORT || 5432}/${process.env.PGDATABASE}`;
     }
 
     if (!connectionString) {
@@ -26,7 +26,7 @@ function getDb() {
 
     pool = new Pool({
       connectionString,
-      ssl: process.env.NODE_ENV === 'production' || connectionString.includes('railway.app')
+      ssl: connectionString.includes('railway') || process.env.NODE_ENV === 'production'
         ? { rejectUnauthorized: false }
         : false,
     });
