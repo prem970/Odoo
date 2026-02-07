@@ -1,0 +1,10 @@
+/*
+ * Global CSS Variables
+ * Purpose: Defines site-wide design tokens like colors, fonts, and spacing.
+ */
+:root {
+    --primary-color: #4f46e5;
+    --secondary-color: #10b981;
+    --text-main: #1f2937;
+    --bg-main: #f9fafb;
+}

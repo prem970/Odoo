@@ -47,8 +47,4 @@ function getDb() {
   return pool;
 }
 
-<<<<<<< HEAD
 module.exports = { getDb };
-=======
-module.exports = { getDb };
->>>>>>> edd232bcb4fb96b6d7d869e8e4fe50994460337e

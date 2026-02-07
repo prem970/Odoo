@@ -1,0 +1,11 @@
+/*
+ * Global Styles
+ * Purpose: Base styles and utility classes for the frontend.
+ */
+@import './variables.css';
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+}
