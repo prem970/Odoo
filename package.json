@@ -6,6 +6,7 @@
         "install:all": "npm install && cd client && npm install && cd ../server && npm install",
         "build": "cd client && npm install --include=dev && npm run build && cd ../server && npm install",
         "postinstall": "cd client && npm install && cd ../server && npm install",
-        "start": "node server/init-db.js && node server/server.js"
+        "start": "node server/init-db.js && node server/server.js",
+        "dev": "npx concurrently \"cd server && npm run dev\" \"cd client && npm run dev\""
     }
 }

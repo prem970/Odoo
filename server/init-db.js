@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { getDb } = require('./config/db');
 
 async function initDb() {
@@ -5,15 +6,16 @@ async function initDb() {
     try {
         console.log('--- Initializing Database ---');
 
-        // Drop existing tables to ensure a clean slate with the new TEXT schema
-        console.log('🗑️ Cleaning old schema...');
-        await db.query('DROP TABLE IF EXISTS messages CASCADE');
-        await db.query('DROP TABLE IF EXISTS users CASCADE');
+        // Only drop tables if explicitly requested (useful for force-resets)
+        if (process.env.RESET_DB === 'true') {
+            console.log('🗑️ Force Reset: Cleaning old schema...');
+            await db.query('DROP TABLE IF EXISTS messages CASCADE');
+            await db.query('DROP TABLE IF EXISTS users CASCADE');
+        }
 
-        // Recreate Users Table with all TEXT types as requested
-        console.log('🏗️ Creating Users table (TEXT schema)...');
+        // Create Users Table with TEXT types
         await db.query(`
-            CREATE TABLE users (
+            CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
                 name TEXT,
                 email TEXT UNIQUE,
@@ -23,10 +25,17 @@ async function initDb() {
             );
         `);
 
-        // Recreate Messages Table with all TEXT types as requested
-        console.log('🏗️ Creating Messages table (TEXT schema)...');
+        // Ensure columns are updated to TEXT if the table already existed (for existing DBs)
         await db.query(`
-            CREATE TABLE messages (
+            ALTER TABLE users ALTER COLUMN name TYPE TEXT;
+            ALTER TABLE users ALTER COLUMN email TYPE TEXT;
+            ALTER TABLE users ALTER COLUMN password_hash TYPE TEXT;
+            ALTER TABLE users ALTER COLUMN role TYPE TEXT;
+        `);
+
+        // Create Messages Table
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS messages (
                 id SERIAL PRIMARY KEY,
                 sender_id INTEGER REFERENCES users(id),
                 content TEXT,
@@ -35,7 +44,7 @@ async function initDb() {
             );
         `);
 
-        console.log('✅ Database Schema Reset Complete (All TEXT)');
+        console.log('✅ Database Schema Verified (All TEXT)');
 
         console.log('--- Database Initialization Complete ---');
         process.exit(0);
