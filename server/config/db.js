@@ -36,6 +36,10 @@ function getDb() {
         : false,
     });
 
+    // Logging to verify connection target
+    const dbHost = connectionString.split('@')[1]?.split(':')[0] || 'localhost';
+    console.log(`📡 Database connecting to: ${dbHost}`);
+
     pool.on('error', (err) => {
       console.error('Unexpected database error:', err);
     });
