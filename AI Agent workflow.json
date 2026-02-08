@@ -1,0 +1,633 @@
+{
+  "name": "AI Agent workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "36d16d33-9da9-4b36-a4d7-bb361bd55480",
+      "name": "Check for Updates Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -576,
+        1216
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  u.id        AS user_id,\n  u.full_name AS user_name,\n  u.email     AS email,\n  c.id        AS course_id,\n  c.title     AS course_name,\n  cp.status   AS course_status,\n  cp.completion_percentage,\n  cp.completed_at,\n  q.id        AS quiz_id,\n  q.title     AS quiz_title,\n  qa.attempted_at,\n  CASE\n    WHEN cp.status = 'COMPLETED'\n      THEN 'course_completion'\n    WHEN qa.id IS NOT NULL\n      THEN 'quiz_posted'\n    WHEN cp.status = 'IN_PROGRESS'\n      THEN 'due_date'\n    ELSE 'new_course'\n  END AS notification_type\nFROM course_progress cp\nJOIN users   u ON u.id = cp.user_id\nJOIN courses c ON c.id = cp.course_id\nLEFT JOIN quizzes      q  ON q.course_id = c.id\nLEFT JOIN quiz_attempts qa ON qa.quiz_id = q.id\n;",
+        "options": {}
+      },
+      "id": "dceb4056-ba05-43f4-b551-a271e747ab74",
+      "name": "Get User Data from PostgreSQL",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -352,
+        1216
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "wnXyp7Mtou8xsdgf",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $('Get User Data from PostgreSQL').item.json.email }}",
+              "rightValue": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b87a047c-4f86-4aa5-80e6-94087c2fb335",
+      "name": "Validate Email Address",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -128,
+        1216
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "subject",
+              "value": "=New Course Added: {{ $json.course_name }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "message",
+              "value": "=Hello {{ $json.user_name }},\n\nWe're excited to announce that a new course has been added: {{ $json.course_name }}\n\nLog in to your account to explore the course content and start learning!\n\nBest regards,\nYour Learning Team",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "toEmail",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f675ac95-87a3-4ab8-a57e-cf4ba55bdaf3",
+      "name": "Prepare New Course Email",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "subject",
+              "value": "=New Quiz Posted: {{ $json.quiz_title }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "message",
+              "value": "=Hello {{ $json.user_name }},\n\nA new quiz has been posted for your course: {{ $json.course_name }}\n\nQuiz Title: {{ $json.quiz_title }}\n\nLog in to your account to take the quiz.\n\nBest regards,\nYour Learning Team",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "toEmail",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e7a73201-7814-4978-a1b4-22bb15d43ff4",
+      "name": "Prepare Quiz Email",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        928
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "subject",
+              "value": "Invalid Email Address - Notification Failed",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "message",
+              "value": "=Email ID not found or invalid.\n\nUser ID: {{ $('Get User Data from PostgreSQL').item.json.user_id }}\nEmail Provided: {{ $('Get User Data from PostgreSQL').item.json.email }}\nNotification Type: {{ $('Get User Data from PostgreSQL').item.json.notification_type }}\n\nPlease update the user's email address in the system.",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "toEmail",
+              "value": "admin@example.com",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "aaa99dbc-cb3e-4d64-9bb4-123413025f84",
+      "name": "Prepare Invalid Email Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        96,
+        1504
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@yourlearningplatform.com",
+        "toEmail": "={{ $json.toEmail }}",
+        "subject": "={{ $json.subject }}",
+        "emailFormat": "text",
+        "text": "={{ $json.message }}",
+        "options": {}
+      },
+      "id": "9a155087-0802-46be-8bf9-d3b03daa3b53",
+      "name": "Send Invalid Email Notification",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        320,
+        1504
+      ],
+      "webhookId": "1311e75b-5f28-4d0a-bc59-75acddb65323",
+      "credentials": {
+        "smtp": {
+          "id": "z1HcizUDsqEq2ihq",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.toEmail }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.message }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        608,
+        736
+      ],
+      "id": "6fbb6597-deef-4f61-90c1-2d8d2be002af",
+      "name": "Send new course email",
+      "webhookId": "f9ef1f2a-05bb-40aa-bd4a-1d8b2813b876",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1d5zoOIsyu4pourQ",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.toEmail }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.message }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        576,
+        944
+      ],
+      "id": "5dd31505-8502-41a7-a212-b05b7067d177",
+      "name": "Send Prepare Quiz Email",
+      "webhookId": "b3501292-b8f6-43ae-b152-aff5fcd109cb",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1d5zoOIsyu4pourQ",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.toEmail }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.message }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        592,
+        1328
+      ],
+      "id": "d9206e54-2edb-47d8-9489-e16132adc809",
+      "name": "Send Completion Email1",
+      "webhookId": "b3501292-b8f6-43ae-b152-aff5fcd109cb",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1d5zoOIsyu4pourQ",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.toEmail }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.message }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        592,
+        1136
+      ],
+      "id": "f783b757-5c3a-43a4-94a4-405843de0347",
+      "name": "Send new course assigned",
+      "webhookId": "b3501292-b8f6-43ae-b152-aff5fcd109cb",
+      "alwaysOutputData": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1d5zoOIsyu4pourQ",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "subject",
+              "value": "=Course Reminder: {{ $json.course_name }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "message",
+              "value": "=Hello {{ $json.user_name }},\n\nThis is a friendly reminder that you have an incomplete course:\n\nCourse Name: {{ $json.course_name }}\nCurrent Progress: {{ $json.completion_percentage }}%\nStatus: {{ $json.course_status }}\n\nPlease log in to your account and complete the course to unlock your certificate.\n\nBest regards,\nYour Learning Team",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "toEmail",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ca835b65-bf79-404e-8f4e-88cf4e8e5476",
+      "name": "new course assigned",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        368,
+        1120
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "subject",
+              "value": "=Congratulations! Course Completed: {{ $json.course_name }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "message",
+              "value": "=Hello {{ $json.user_name }},\n\nCongratulations on completing the course: {{ $json.course_name }}!\n\nYou've successfully finished all the requirements. Your certificate will be available in your account shortly.\n\nKeep up the great work!\n\nBest regards,\nYour Learning Team",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "toEmail",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ec6c72a9-7dd6-4921-9d33-84ef1125174a",
+      "name": "Prepare Completion Email",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        1312
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.notification_type }}",
+                    "rightValue": "new_course",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "78d2ca94-d1c4-49bb-8bfb-d65af6208517"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "New Course"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.notification_type }}",
+                    "rightValue": "quiz_posted",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "adcb24f1-adcf-49d1-91d7-bdc84173c718"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Quiz Posted"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.notification_type }}",
+                    "rightValue": "due_date",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "5292dfbe-bfff-4f43-ab10-e31f1b22ab77"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Course Reminder"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.notification_type }}",
+                    "rightValue": "course_completion",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "aabff196-98d1-40dc-846d-cb3015d9accd"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Course Completion"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "39b8ddd1-13fa-448d-8aca-c09fb8a64232",
+      "name": "Route by Notification Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        96,
+        992
+      ],
+      "alwaysOutputData": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Check for Updates Schedule": {
+      "main": [
+        [
+          {
+            "node": "Get User Data from PostgreSQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get User Data from PostgreSQL": {
+      "main": [
+        [
+          {
+            "node": "Validate Email Address",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Email Address": {
+      "main": [
+        [
+          {
+            "node": "Route by Notification Type",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Invalid Email Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare New Course Email": {
+      "main": [
+        [
+          {
+            "node": "Send new course email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Quiz Email": {
+      "main": [
+        [
+          {
+            "node": "Send Prepare Quiz Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Invalid Email Message": {
+      "main": [
+        [
+          {
+            "node": "Send Invalid Email Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "new course assigned": {
+      "main": [
+        [
+          {
+            "node": "Send new course assigned",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Completion Email": {
+      "main": [
+        [
+          {
+            "node": "Send Completion Email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Notification Type": {
+      "main": [
+        [
+          {
+            "node": "Prepare New Course Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Quiz Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "new course assigned",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Completion Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "availableInMCP": false
+  },
+  "versionId": "3a116552-0125-4e62-a3ea-7b6f57264eba",
+  "meta": {
+    "templateId": "ready-to-run-ai-workflow",
+    "templateCredsSetupCompleted": true,
+    "instanceId": "800b673b4389ca00779403b9aa9a3f6d14da0826adb0cccd7496dd6711ece3c5"
+  },
+  "id": "mIOpXafUryvNOXAb",
+  "tags": []
+}
