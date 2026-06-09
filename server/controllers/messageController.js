@@ -39,7 +39,7 @@ const getAllMessagesForAdmin = async (req, res) => {
     try {
         const db = getDb();
         const result = await db.query(
-            `SELECT m.*, u.name as sender_name 
+            `SELECT m.*, u.full_name as sender_name 
        FROM messages m 
        JOIN users u ON m.sender_id = u.id 
        ORDER BY m.created_at DESC`

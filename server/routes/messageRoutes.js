@@ -8,12 +8,12 @@ const {
 } = require('../controllers/messageController');
 const { authenticateToken, authorizeRole } = require('../middleware/auth');
 
-// User routes
-router.post('/send', authenticateToken, authorizeRole('user'), sendMessage);
-router.get('/user', authenticateToken, authorizeRole('user'), getUserMessages);
+// User routes (Allow Learners and Instructors to send/receive messages)
+router.post('/send', authenticateToken, sendMessage);
+router.get('/user', authenticateToken, getUserMessages);
 
 // Admin routes
-router.get('/admin', authenticateToken, authorizeRole('admin'), getAllMessagesForAdmin);
-router.put('/update/:id', authenticateToken, authorizeRole('admin'), updateMessage);
+router.get('/admin', authenticateToken, authorizeRole('ADMIN'), getAllMessagesForAdmin);
+router.put('/update/:id', authenticateToken, authorizeRole('ADMIN'), updateMessage);
 
 module.exports = router;

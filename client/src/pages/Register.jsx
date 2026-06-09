@@ -12,7 +12,7 @@ const Register = () => {
         email: '',
         password: '',
         confirmPassword: '',
-        role: 'user'
+        role: 'learner'
     });
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -160,8 +160,8 @@ const Register = () => {
                                         className="flex h-12 w-full rounded-lg border border-neutral-400 bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                                         disabled={isLoading}
                                     >
-                                        <option value="user">User</option>
-                                        <option value="admin">Admin</option>
+                                        <option value="learner">Learner</option>
+                                        <option value="instructor">Instructor</option>
                                     </select>
                                 </div>
 

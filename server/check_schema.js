@@ -1,0 +1,16 @@
+const { getDb } = require('./config/db');
+require('dotenv').config();
+
+async function checkSchema() {
+    const db = getDb();
+    try {
+        const res = await db.query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'users'");
+        console.log('USERS Table Columns:', JSON.stringify(res.rows, null, 2));
+    } catch (e) {
+        console.error('Error checking schema:', e);
+    } finally {
+        process.exit(0);
+    }
+}
+
+checkSchema();

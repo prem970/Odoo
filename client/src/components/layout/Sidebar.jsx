@@ -1,18 +1,50 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Users, Box, BarChart3, Settings, Menu, X, LogOut } from 'lucide-react';
+import { NavLink, Link } from 'react-router-dom';
+import { LayoutDashboard, Users, Box, BarChart3, Settings, Menu, X, LogOut, User, Archive, Video, BookOpen, FileText } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Button } from '../ui/Button';
 import { Logo } from '../ui/Logo';
+import { useAuth } from '../../context/AuthContext';
 
 const Sidebar = ({ className, isOpen, onClose }) => {
-    const navItems = [
-        { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-        { label: 'CRM / Sales', icon: Users, path: '/crm' },
-        { label: 'Inventory', icon: Box, path: '/inventory' },
-        { label: 'Accounting', icon: BarChart3, path: '/accounting' },
-        { label: 'Settings', icon: Settings, path: '/settings' },
-    ];
+    const { user, logout } = useAuth();
+
+    // Normalize role
+    const role = (user?.role || '').toString().trim().toUpperCase();
+
+    let navItems = [];
+
+    if (role === 'ADMIN') {
+        navItems = [
+            { label: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
+            { label: 'Users', icon: Users, path: '/admin/users' },
+            { label: 'My Profile', icon: User, path: '/user/profile' },
+            { label: 'Settings', icon: Settings, path: '/settings' },
+        ];
+    } else if (role === 'INSTRUCTOR' || role === 'MENTOR' || role === 'TEACHER') {
+        navItems = [
+            { label: 'Dashboard', icon: LayoutDashboard, path: '/instructor/dashboard' }, // Fixed path for instructor
+            { label: 'Explore Courses', icon: Archive, path: '/courses/explore' },
+            { label: 'Live Classes', icon: Video, path: '/live-classes' },
+            { label: 'My Profile', icon: User, path: '/user/profile' },
+            { label: 'Settings', icon: Settings, path: '/settings' },
+        ];
+    } else {
+        // Learner / User / Default
+        navItems = [
+            { label: 'Dashboard', icon: LayoutDashboard, path: '/user/dashboard' },
+            { label: 'Explore Courses', icon: Archive, path: '/courses/explore' },
+            { label: 'Live Classes', icon: Video, path: '/live-classes' },
+            { label: 'Upcoming Quizzes', icon: BookOpen, path: '/quizzes' },
+            { label: 'Assignments', icon: FileText, path: '/assignments' },
+            { label: 'My Profile', icon: User, path: '/user/profile' },
+        ];
+    }
+
+    const getInitials = (name) => {
+        if (!name) return '??';
+        return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    };
 
     return (
         <>
@@ -28,12 +60,12 @@ const Sidebar = ({ className, isOpen, onClose }) => {
             {/* Sidebar Container */}
             <aside
                 className={cn(
-                    "fixed top-0 left-0 z-50 h-screen w-64 bg-neutral-50 border-r border-neutral-200 transition-transform duration-300 lg:translate-x-0 lg:static",
+                    "fixed top-0 left-0 z-50 h-screen w-64 bg-neutral-50 border-r border-neutral-200 transition-transform duration-300 lg:translate-x-0 lg:static flex flex-col",
                     isOpen ? "translate-x-0" : "-translate-x-full",
                     className
                 )}
             >
-                <div className="flex h-16 items-center px-6 border-b border-neutral-200 gap-2">
+                <div className="flex h-16 items-center px-6 border-b border-neutral-200 gap-2 shrink-0">
                     <Logo className="h-8 w-8" />
                     <span className="text-2xl font-bold text-primary tracking-tight">LearnSphere</span>
                     <button className="ml-auto lg:hidden" onClick={onClose}>
@@ -41,7 +73,7 @@ const Sidebar = ({ className, isOpen, onClose }) => {
                     </button>
                 </div>
 
-                <nav className="p-4 space-y-1">
+                <nav className="p-4 space-y-1 flex-1 overflow-y-auto">
                     {navItems.map((item) => (
                         <NavLink
                             key={item.path}
@@ -66,16 +98,21 @@ const Sidebar = ({ className, isOpen, onClose }) => {
                     ))}
                 </nav>
 
-                <div className="absolute bottom-4 left-4 right-4">
+                <div className="p-4 shrink-0 border-t border-neutral-200">
                     <div className="p-4 bg-white rounded-xl border border-neutral-200 shadow-sm flex items-center gap-3">
                         <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                            JD
+                            {getInitials(user?.full_name || user?.name)}
                         </div>
                         <div className="flex-1 overflow-hidden">
-                            <p className="text-sm font-medium truncate">John Doe</p>
-                            <p className="text-xs text-neutral-500 truncate">Admin</p>
+                            <p className="text-sm font-medium truncate text-neutral-900">{user?.full_name || user?.name || 'Guest User'}</p>
+                            <p className="text-xs text-neutral-500 truncate capitalize">{user?.role || 'Guest'}</p>
                         </div>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-neutral-400 hover:text-red-500">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-neutral-400 hover:text-red-500 hover:bg-red-500/10"
+                            onClick={logout}
+                        >
                             <LogOut className="h-4 w-4" />
                         </Button>
                     </div>

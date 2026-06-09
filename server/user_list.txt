@@ -1,0 +1,99 @@
+﻿≡ƒôí Database connecting to: trolley.proxy.rlwy.net
+USERS IN DATABASE: [
+  {
+    "id": "7ba0baaa-6685-405a-a36c-548483362bbe",
+    "full_name": "Felix Jonus I",
+    "email": "felixjonus07@gmail.com",
+    "role": "LEARNER"
+  },
+  {
+    "id": "e2990810-4dba-45d9-8519-95528f403f22",
+    "full_name": "Ram",
+    "email": "rsamy2426@gmail.com",
+    "role": "INSTRUCTOR"
+  },
+  {
+    "id": "d6c471d8-9cd8-49c2-8bf5-a8ac1b6e86ab",
+    "full_name": "Ravi Kumar",
+    "email": "ravi@learnsphere.com",
+    "role": "INSTRUCTOR"
+  },
+  {
+    "id": "b1f90552-68e9-4205-a9e6-b847a90569d8",
+    "full_name": "Anu Sharma",
+    "email": "anu@learnsphere.com",
+    "role": "LEARNER"
+  },
+  {
+    "id": "141c206d-676e-4681-91a9-93700ff7e04e",
+    "full_name": "prem",
+    "email": "prempappian86@gmail.com",
+    "role": "LEARNER"
+  },
+  {
+    "id": "e6ee347a-f73c-42a3-aefe-502e910ca32e",
+    "full_name": "prem",
+    "email": "prem97@gmail.com",
+    "role": "LEARNER"
+  },
+  {
+    "id": "77a48a48-187c-4f6f-b80a-07306d247031",
+    "full_name": "System Admin",
+    "email": "admin@odoo-clone.com",
+    "role": "ADMIN"
+  },
+  {
+    "id": "15047227-d3db-459d-a096-3926d192eb10",
+    "full_name": "System Admin",
+    "email": "admin@learnsphere.com",
+    "role": "ADMIN"
+  },
+  {
+    "id": "c5b27e61-4cc9-4aa2-95b7-1deb1613672b",
+    "full_name": "Ramasamy T",
+    "email": "instructor@learnsphere.com",
+    "role": "INSTRUCTOR"
+  },
+  {
+    "id": "e674e89a-0bd6-4cf0-944e-3e22cdaf66e4",
+    "full_name": "Charu",
+    "email": "charuuuu.16@gmail.com",
+    "role": "LEARNER"
+  },
+  {
+    "id": "2be4ad52-a3ff-4b98-9598-61892bea080a",
+    "full_name": "Guru Vishnu S",
+    "email": "kit28.24bad052@gmail.com",
+    "role": "LEARNER"
+  },
+  {
+    "id": "c4b7491d-ed38-4186-88dc-5d0e2de39bce",
+    "full_name": "Guru Vishnu",
+    "email": "guruv0707@gmail.com",
+    "role": "LEARNER"
+  },
+  {
+    "id": "5a117032-65fe-49b8-a192-066ac0c94e1a",
+    "full_name": "KIT UDHAYAM'25",
+    "email": "kitudhayam2023@gmail.com",
+    "role": "LEARNER"
+  },
+  {
+    "id": "d34584fc-c8e2-4829-afa1-ac27374121d8",
+    "full_name": "GURU VISHNU S",
+    "email": "kitudhayam2k26@gmail.com",
+    "role": "INSTRUCTOR"
+  },
+  {
+    "id": "1b9945a3-88da-400a-8ea6-cd304c9be37f",
+    "full_name": "Test User",
+    "email": "test_login_antigravity@example.com",
+    "role": "LEARNER"
+  },
+  {
+    "id": "076363e0-15bf-4e06-8cec-49aad3f70ec8",
+    "full_name": "Instructor User",
+    "email": "instructor_test@example.com",
+    "role": "INSTRUCTOR"
+  }
+]

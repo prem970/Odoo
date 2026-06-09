@@ -1,12 +1,10 @@
 import React from 'react';
-import logoImage from '../../assets/logo.png';
+import { GraduationCap } from 'lucide-react';
 
-export const Logo = ({ className = "h-10 w-10" }) => {
+export const Logo = ({ className = "h-10 w-10 text-primary" }) => {
     return (
-        <img
-            src={logoImage}
-            alt="Logo"
-            className={`object-contain ${className}`}
-        />
+        <div className={`flex items-center justify-center rounded-xl bg-primary/10 ${className}`}>
+            <GraduationCap className="w-2/3 h-2/3" />
+        </div>
     );
 };

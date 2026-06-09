@@ -1,20 +1,33 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
 
-const Card = React.forwardRef(({ className, variant = 'default', moduleColor, ...props }, ref) => {
+const Card = React.forwardRef(({ className, variant = 'default', moduleColor, enhanced = false, ...props }, ref) => {
     return (
         <div
             ref={ref}
             className={cn(
-                "rounded-2xl border border-neutral-200 bg-white text-neutral-950 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1",
+                "rounded-2xl border border-neutral-200 bg-white text-neutral-950 shadow-sm transition-all duration-300",
+                // Default hover
+                !enhanced && "hover:shadow-md hover:-translate-y-1",
+                // Enhanced hover with more lift and glow
+                enhanced && "hover:shadow-xl hover:-translate-y-3 hover:border-primary/20",
+                // Dashboard variant with top border
                 variant === 'dashboard' && "border-t-4",
-                variant === 'dashboard' && moduleColor === 'crm' && "border-t-module-crm",
-                variant === 'dashboard' && moduleColor === 'inventory' && "border-t-module-inventory",
-                variant === 'dashboard' && moduleColor === 'finance' && "border-t-module-finance",
+                variant === 'dashboard' && moduleColor === 'crm' && "border-t-module-crm hover:shadow-module-crm/20",
+                variant === 'dashboard' && moduleColor === 'inventory' && "border-t-module-inventory hover:shadow-module-inventory/20",
+                variant === 'dashboard' && moduleColor === 'finance' && "border-t-module-finance hover:shadow-module-finance/20",
+                // Enhanced variant adds gradient overlay on hover
+                enhanced && "relative overflow-hidden group",
                 className
             )}
             {...props}
-        />
+        >
+            {/* Gradient overlay on hover for enhanced variant */}
+            {enhanced && (
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            )}
+            {props.children}
+        </div>
     );
 });
 Card.displayName = "Card";

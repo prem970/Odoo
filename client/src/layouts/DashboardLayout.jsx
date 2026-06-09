@@ -3,10 +3,11 @@ import { Sidebar } from '../components/layout/Sidebar';
 import { Topbar } from '../components/layout/Topbar';
 
 const DashboardLayout = ({ children }) => {
+    console.log('DashboardLayout: Rendering...');
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     return (
-        <div className="min-h-screen bg-neutral-50 flex">
+        <div className="h-screen bg-neutral-50 flex overflow-hidden">
             <Sidebar
                 isOpen={sidebarOpen}
                 onClose={() => setSidebarOpen(false)}

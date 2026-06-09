@@ -13,13 +13,7 @@ const Topbar = ({ onMenuClick }) => {
                 </Button>
 
                 <div className="hidden md:flex items-center gap-2 w-96">
-                    <div className="relative w-full">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
-                        <Input
-                            placeholder="Search..."
-                            className="pl-10 bg-neutral-50 border-transparent focus:bg-white focus:border-primary/20"
-                        />
-                    </div>
+                    {/* Global Search Removed as per requirement */}
                 </div>
             </div>
 

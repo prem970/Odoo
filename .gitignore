@@ -9,23 +9,25 @@ yarn-error.log*
 .env.development
 
 # Build
-dist/
-build/
-.next/
-out/
+
+
+#dist/
+#build/
+#.next/
+#out/
 
 # IDE
-.vscode/
-.idea/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.swp
+#.vscode/
+#.idea/
+#*.suo
+#*.ntvs*
+#*.njsproj
+#*.sln
+#*.swp
 
 # OS
-.DS_Store
-Thumbs.db
+#.DS_Store
+#Thumbs.db
 
 # Railway
-.railway
+#.railway
